@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Manify</title>
+<meta name="description" content="Manify — YouTube tabanlı, backend'siz müzik keşif ve oynatma uygulaması." />
+
+<meta name="theme-color" content="#0a0a0e" />
+<link rel="manifest" href="manifest.webmanifest" />
+
+<!-- iOS home screen support -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Manify" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" href="icons/icon-192.png" />
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Skip link for keyboard/screen-reader users -->
+<a class="skip-link" href="#main-content">İçeriğe geç</a>
+
+<div id="app" class="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="topbar" role="banner">
+    <button id="menuToggle" class="icon-btn" type="button" aria-label="Menüyü aç" aria-expanded="false" aria-controls="sidebar">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="brand" aria-hidden="true">
+      <span class="brand-mark"></span>
+      <span class="brand-name">Manify</span>
+    </div>
+
+    <form id="searchForm" class="topbar-search" role="search">
+      <label for="searchInput" class="visually-hidden">Şarkı, sanatçı veya albüm ara</label>
+      <input id="searchInput" name="q" type="search" inputmode="search" autocomplete="off"
+             placeholder="Şarkı, sanatçı, albüm ara" aria-label="Ara" />
+      <button type="submit" class="icon-btn search-submit" aria-label="Ara">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </form>
+
+    <button id="queueToggle" class="icon-btn" type="button" aria-label="Kuyruğu aç" aria-expanded="false" aria-controls="queuePanel">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </header>
+
+  <!-- ===================== SIDEBAR / NAV DRAWER ===================== -->
+  <div id="sidebarScrim" class="scrim" hidden></div>
+  <nav id="sidebar" class="sidebar" aria-label="Ana gezinme">
+    <div class="sidebar-head">
+      <span class="brand-mark"></span>
+      <span class="brand-name">Manify</span>
+      <button id="sidebarClose" class="icon-btn" type="button" aria-label="Menüyü kapat">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <ul class="nav-list" role="list">
+      <li><button class="nav-item" data-view="home" aria-current="page">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 11l8-7 8 7M6 10v9h12v-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ana Sayfa</button></li>
+      <li><button class="nav-item" data-view="search">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Ara</button></li>
+      <li><button class="nav-item" data-view="favorites">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 20s-7-4.35-9.5-8.8C.8 7.6 2.4 4 6 4c2 0 3.4 1.1 4 2.2C10.6 5.1 12 4 14 4c3.6 0 5.2 3.6 3.5 7.2C19 15.65 12 20 12 20z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Favoriler</button></li>
+      <li><button class="nav-item" data-view="history">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Geçmiş</button></li>
+      <li><button class="nav-item" data-view="queue">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Kuyruk</button></li>
+      <li><button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Ayarlar</button></li>
+    </ul>
+    <p class="sidebar-note">Backend yok · Veriler yalnızca bu cihazda</p>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="main-content" class="main" tabindex="-1">
+
+    <!-- Global network / info banner -->
+    <div id="offlineBanner" class="banner" role="status" hidden>Çevrimdışısın. Uygulama kabuğu önbellekten açıldı; arama ve oynatma için bağlantı gerekir.</div>
+
+    <!-- HOME VIEW -->
+    <section id="view-home" class="view" data-view-panel="home">
+      <div class="home-hero">
+        <span class="brand-mark brand-mark-lg" aria-hidden="true"></span>
+        <div>
+          <h1>Hoş geldin</h1>
+          <p class="muted">YouTube üzerinden müzik keşfet, çal ve kuyruğunu yönet — hepsi bu cihazda.</p>
+        </div>
+      </div>
+      <p class="tag-nobackend">Backend'siz çalışıyor · hesap gerekmiyor</p>
+
+      <div class="home-section">
+        <div class="home-section-head"><h2>Son aramalar</h2></div>
+        <div id="homeRecentSearches" class="chip-row"></div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-head"><h2>Son çalınanlar</h2></div>
+        <div id="homeRecentlyPlayed" class="card-row"></div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-head"><h2>Favorilerinden</h2></div>
+        <div id="homeFavorites" class="card-row"></div>
+      </div>
+
+      <div class="home-section">
+        <div class="home-section-head">
+          <h2>Kuyruk özeti</h2>
+          <button class="link-btn" data-view="queue">Tümünü gör</button>
+        </div>
+        <div id="homeQueueSummary" class="list-compact"></div>
+      </div>
+
+      <button id="homeQuickSearch" class="fab" type="button" aria-label="Hızlı arama">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </section>
+
+    <!-- SEARCH VIEW -->
+    <section id="view-search" class="view" data-view-panel="search" hidden>
+      <div class="filter-row" role="tablist" aria-label="Sonuç türü filtresi">
+        <button class="chip chip-filter is-active" data-filter="all" role="tab" aria-selected="true">Tümü</button>
+        <button class="chip chip-filter" data-filter="song" role="tab" aria-selected="false">Şarkılar</button>
+        <button class="chip chip-filter" data-filter="video" role="tab" aria-selected="false">Videolar</button>
+        <button class="chip chip-filter" data-filter="artist" role="tab" aria-selected="false">Sanatçılar</button>
+        <button class="chip chip-filter" data-filter="album" role="tab" aria-selected="false">Albümler</button>
+        <button class="chip chip-filter" data-filter="playlist" role="tab" aria-selected="false">Playlist'ler</button>
+      </div>
+
+      <div id="searchStatus" class="search-status" aria-live="polite"></div>
+      <ul id="searchResults" class="result-list" role="list"></ul>
+      <div id="searchEmpty" class="empty-state">
+        <p>Aramaya başlamak için yukarıdan bir şey yaz.</p>
+      </div>
+    </section>
+
+    <!-- FAVORITES VIEW -->
+    <section id="view-favorites" class="view" data-view-panel="favorites" hidden>
+      <div class="view-head">
+        <h1>Favoriler</h1>
+        <input id="favoritesFilter" class="mini-input" type="search" placeholder="Favorilerde ara" aria-label="Favorilerde ara" />
+      </div>
+      <ul id="favoritesList" class="result-list" role="list"></ul>
+      <div id="favoritesEmpty" class="empty-state" hidden><p>Henüz favori eklemedin. Bir sonucun kalp simgesine dokun.</p></div>
+    </section>
+
+    <!-- HISTORY VIEW -->
+    <section id="view-history" class="view" data-view-panel="history" hidden>
+      <div class="view-head">
+        <h1>Geçmiş</h1>
+        <button id="clearHistoryBtn" class="text-btn">Geçmişi temizle</button>
+      </div>
+      <h2 class="subhead">Son oynatılanlar</h2>
+      <ul id="playHistoryList" class="result-list" role="list"></ul>
+      <h2 class="subhead">Son aramalar</h2>
+      <ul id="searchHistoryList" class="result-list-compact" role="list"></ul>
+      <div id="historyEmpty" class="empty-state" hidden><p>Henüz geçmiş yok.</p></div>
+    </section>
+
+    <!-- QUEUE VIEW -->
+    <section id="view-queue" class="view" data-view-panel="queue" hidden>
+      <div class="view-head">
+        <h1>Kuyruk</h1>
+        <button id="clearQueueBtn" class="text-btn">Kuyruğu temizle</button>
+      </div>
+      <div class="queue-controls">
+        <button id="shuffleBtn" class="chip chip-toggle" type="button" aria-pressed="false">Karıştır</button>
+        <button id="repeatBtn" class="chip chip-toggle" type="button" aria-pressed="false" data-mode="off">Tekrar: Kapalı</button>
+      </div>
+      <ul id="queueList" class="result-list queue-list" role="list"></ul>
+      <div id="queueEmpty" class="empty-state"><p>Kuyruk boş. Aramadan bir parça ekle.</p></div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="view-settings" class="view" data-view-panel="settings" hidden>
+      <h1>Ayarlar</h1>
+
+      <div class="settings-group">
+        <h2>Görünüm</h2>
+        <label class="settings-row">
+          <span>Tema</span>
+          <select id="themeSelect">
+            <option value="dark">Manify Dark</option>
+            <option value="system">Sistem</option>
+          </select>
+        </label>
+        <label class="settings-row">
+          <span>Animasyonları azalt</span>
+          <input type="checkbox" id="reduceMotionToggle" />
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h2>Oynatma</h2>
+        <label class="settings-row">
+          <span>Otomatik sonraki parçaya geç</span>
+          <input type="checkbox" id="autoNextToggle" checked />
+        </label>
+        <label class="settings-row">
+          <span>Kuyruğu açılışta geri yükle</span>
+          <input type="checkbox" id="restoreQueueToggle" checked />
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h2>Geçmiş</h2>
+        <label class="settings-row">
+          <span>Geçmişi etkinleştir</span>
+          <input type="checkbox" id="historyEnabledToggle" checked />
+        </label>
+      </div>
+
+      <div class="settings-group">
+        <h2>Veriler</h2>
+        <button id="exportDataBtn" class="text-btn">Yerel verileri dışa aktar</button>
+        <label class="text-btn file-label">
+          Yerel verileri içe aktar
+          <input id="importDataInput" type="file" accept="application/json" class="visually-hidden" />
+        </label>
+        <button id="clearFavoritesBtn" class="text-btn text-btn-danger">Favorileri temizle</button>
+        <button id="clearHistoryBtn2" class="text-btn text-btn-danger">Geçmişi temizle</button>
+        <button id="clearAllDataBtn" class="text-btn text-btn-danger">Tüm yerel verileri sil</button>
+      </div>
+
+      <div class="settings-group">
+        <h2>iPhone'a kur</h2>
+        <ol class="install-steps">
+          <li>Safari'de Manify sayfasını aç.</li>
+          <li>Alt menüde Paylaş simgesine dokun.</li>
+          <li>"Ana Ekrana Ekle" seçeneğini seç.</li>
+          <li>Sağ üstten "Ekle"ye dokun.</li>
+          <li>Manify artık ana ekrandan uygulama gibi açılır.</li>
+        </ol>
+      </div>
+
+      <div class="settings-group">
+        <h2>Bilinen sınırlamalar</h2>
+        <ul class="limits-list">
+          <li>Arama, resmi YouTube Data API v3 üzerinden yapılır; ücretsiz kota günlük olarak sınırlıdır (kota dolarsa arama ertesi gün otomatik sıfırlanır).</li>
+          <li>Oynatma, YouTube'un kendi web oynatıcısı (IFrame Player) üzerinden yapılır — bağımsız bir ses motoru değildir.</li>
+          <li>iOS Safari; otomatik oynatmayı, ekran kilitliyken sesin sürmesini ve arka plan oynatmayı kısıtlayabilir.</li>
+          <li>Bu sürüm kişisel/tek kullanıcı için tasarlanmıştır; API anahtarı `app.js` içine gömülüdür ve favoriler/geçmiş/kuyruk yalnızca bu cihazda saklanır.</li>
+        </ul>
+      </div>
+
+      <p class="version-tag">Manify Web PWA · sürüm 1.0.0 · Açık kaynak Metrolist fikrinden esinlenilmiştir</p>
+    </section>
+
+  </main>
+
+  <!-- ===================== QUEUE SIDE PANEL ===================== -->
+  <div id="queueScrim" class="scrim" hidden></div>
+  <aside id="queuePanel" class="queue-panel" aria-label="Oynatma kuyruğu" hidden>
+    <div class="queue-panel-head">
+      <h2>Kuyruk</h2>
+      <button id="queuePanelClose" class="icon-btn" type="button" aria-label="Kuyruğu kapat">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <ul id="queuePanelList" class="result-list queue-list" role="list"></ul>
+    <div id="queuePanelEmpty" class="empty-state"><p>Kuyruk boş.</p></div>
+  </aside>
+
+  <!-- ===================== MINI PLAYER ===================== -->
+  <div id="miniPlayer" class="mini-player" hidden>
+    <div class="mini-progress"><div id="miniProgressFill" class="mini-progress-fill"></div></div>
+    <button id="miniPlayerOpen" class="mini-player-main" type="button" aria-label="Tam ekran player'ı aç">
+      <img id="miniThumb" class="mini-thumb" alt="" />
+      <span class="mini-meta">
+        <span id="miniTitle" class="mini-title"></span>
+        <span id="miniArtist" class="mini-artist"></span>
+      </span>
+    </button>
+    <div class="mini-controls">
+      <button id="miniPrev" class="icon-btn" type="button" aria-label="Önceki parça">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M19 5v14L8 12l11-7z"/><rect x="5" y="5" width="2" height="14"/></svg>
+      </button>
+      <button id="miniPlayPause" class="icon-btn icon-btn-lg" type="button" aria-label="Oynat">
+        <svg id="miniPlayIcon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 5l12 7-12 7V5z"/></svg>
+      </button>
+      <button id="miniNext" class="icon-btn" type="button" aria-label="Sonraki parça">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 5v14l11-7L5 5z"/><rect x="17" y="5" width="2" height="14"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== FULL SCREEN PLAYER ===================== -->
+  <div id="fullPlayer" class="full-player" hidden aria-modal="true" role="dialog" aria-label="Tam ekran oynatıcı">
+    <div class="full-player-head">
+      <button id="fullPlayerClose" class="icon-btn" type="button" aria-label="Player'ı kapat">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 12h12M6 12l6-6M6 12l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="full-player-eyebrow">Şimdi çalıyor</span>
+      <button id="fullPlayerYoutube" class="icon-btn" type="button" aria-label="YouTube'da aç">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" stroke-width="2"/><path d="M10 9l6 3-6 3V9z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <div class="full-player-art-wrap">
+      <img id="fullThumb" class="full-player-art" alt="" />
+    </div>
+
+    <div class="full-player-meta">
+      <h2 id="fullTitle" class="full-title"></h2>
+      <p id="fullArtist" class="full-artist"></p>
+    </div>
+
+    <div class="full-player-progress">
+      <input id="seekBar" type="range" min="0" max="100" value="0" step="1" aria-label="Oynatma konumu" disabled />
+      <div class="time-row">
+        <span id="timeCurrent">0:00</span>
+        <span id="timeRemaining">0:00</span>
+      </div>
+    </div>
+
+    <div class="full-player-controls">
+      <button id="fullShuffle" class="icon-btn" type="button" aria-label="Karıştır" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 6h3l9 12h4M4 18h3l3-4M16 6h4M16 6l3-3M16 6l3 3M20 18l-3 3M20 18l-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+      <button id="fullPrev" class="icon-btn icon-btn-lg" type="button" aria-label="Önceki parça">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M19 5v14L8 12l11-7z"/><rect x="5" y="5" width="2" height="14"/></svg>
+      </button>
+      <button id="fullPlayPause" class="icon-btn icon-btn-xl" type="button" aria-label="Oynat">
+        <svg id="fullPlayIcon" viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path d="M8 5l12 7-12 7V5z"/></svg>
+      </button>
+      <button id="fullNext" class="icon-btn icon-btn-lg" type="button" aria-label="Sonraki parça">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M5 5v14l11-7L5 5z"/><rect x="17" y="5" width="2" height="14"/></svg>
+      </button>
+      <button id="fullRepeat" class="icon-btn" type="button" aria-label="Tekrar: Kapalı" data-mode="off">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </button>
+    </div>
+
+    <div class="full-player-secondary">
+      <button id="fullFavorite" class="text-btn" type="button" aria-pressed="false">♥ Favori</button>
+      <button id="fullAddQueue" class="text-btn" type="button">Kuyruğa ekle</button>
+    </div>
+
+    <!-- Actual YouTube IFrame target. Kept modestly sized and visible per policy — never hidden as a fake "native" engine. -->
+    <div id="ytPlayerWrap" class="yt-player-wrap">
+      <div id="ytPlayer"></div>
+    </div>
+    <p class="yt-disclosure">Oynatma, YouTube'un resmi web oynatıcısı üzerinden yapılır.</p>
+  </div>
+
+  <!-- ===================== TOASTS ===================== -->
+  <div id="toastArea" class="toast-area" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ===================== TEMPLATES ===================== -->
+  <template id="resultCardTemplate">
+    <li class="result-item">
+      <button class="result-thumb-btn" type="button" aria-label="Oynat">
+        <img class="result-thumb" alt="" loading="lazy" />
+        <span class="result-type-badge"></span>
+      </button>
+      <div class="result-info">
+        <p class="result-title"></p>
+        <p class="result-sub"></p>
+      </div>
+      <span class="result-duration"></span>
+      <button class="icon-btn result-fav" type="button" aria-label="Favorilere ekle" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 20s-7-4.35-9.5-8.8C.8 7.6 2.4 4 6 4c2 0 3.4 1.1 4 2.2C10.6 5.1 12 4 14 4c3.6 0 5.2 3.6 3.5 7.2C19 15.65 12 20 12 20z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn result-queue" type="button" aria-label="Kuyruğa ekle">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn result-more" type="button" aria-label="Daha fazla">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </button>
+    </li>
+  </template>
+
+  <template id="skeletonCardTemplate">
+    <li class="result-item skeleton" aria-hidden="true">
+      <span class="result-thumb skeleton-block"></span>
+      <div class="result-info">
+        <span class="skeleton-line" style="width:70%"></span>
+        <span class="skeleton-line" style="width:40%"></span>
+      </div>
+    </li>
+  </template>
+
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
